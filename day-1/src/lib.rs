@@ -6,16 +6,35 @@ fn read_file(path: &str) -> Result<Vec<String>, Error> {
     Ok(s.split("\n\n").map(|x| x.to_string()).collect())
 }
 
-pub fn count_calories(calories: Vec<String>) -> u16 {
-    let maxs = calories
+pub fn count_calories(calories: Vec<String>) -> u32 {
+    calories
         .into_iter()
         .map(|x| {
             x.split("\n")
-                .map(|x| x.parse::<u16>().unwrap_or_default())
-                .sum::<u16>()
+                .map(|x| x.parse::<u32>().unwrap_or_default())
+                .sum::<u32>()
         })
-        .max();
-    maxs.unwrap_or_default()
+        .max()
+        .unwrap_or_default()
+}
+
+pub fn count_top_3_calories(calories: Vec<String>) -> u32 {
+    let mut sum: Vec<u32> = calories
+        .into_iter()
+        .map(|x| {
+            x.split("\n")
+                .map(|x| x.parse::<u32>().unwrap_or_default())
+                .sum::<u32>()
+        })
+        .collect();
+    let mut s = 0u32;
+    for _ in 0..3 {
+        let max = *sum.iter().max().unwrap();
+        let pos = sum.iter().position(|x| *x == max).unwrap();
+        sum.remove(pos);
+        s += max;
+    }
+    s
 }
 
 #[cfg(test)]
@@ -42,5 +61,15 @@ mod tests {
             24000,
             count_calories(read_file("./data/calories.txt").unwrap())
         );
+    }
+
+    #[test]
+    fn test_input() {
+        dbg!(count_calories(read_file("./data/input.txt").unwrap()));
+    }
+
+    #[test]
+    fn test_input_3() {
+        dbg!(count_top_3_calories(read_file("./data/input.txt").unwrap()));
     }
 }
